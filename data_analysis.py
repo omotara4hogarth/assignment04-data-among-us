@@ -1,9 +1,8 @@
 import pandas as pd
-import matplotlib
+import matplotlib, os, base64, json
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
-
-load_dotenv()
+from requests import post, get
 
 def read_dataset(path):
     '''Takes the path of a dataset csv file as input, and returns it read as a Pandas dataframe'''
@@ -39,22 +38,69 @@ def normalise_dataset(df):
             i += 1
         col_idx += 1
 
+    print(responders_tastes)
+
     for responder in responders_tastes:
-        responders_tastes[responder] = responders_tastes[responder].split(",")
+        responders_tastes[responder] = responders_tastes[responder].replace(" ", "").split(",")
     
     print(responders_tastes)
 
-    #Call genre_query function
+    #Call genre_query function on each list item in the responders_tastes dictionary, and replace the list with a new list of all genres
+
+    for responder in responders_tastes:
+        responders_genres = []
+        for artist_id in responders_tastes[responder]:
+            if artist_id != 'nan' and type(artist_id) != None:
+                #print(genre_query(artist_id)[1].status_code)
+                responders_genres = [responders_genres.append(genre) for genre in genre_query(artist_id)[0] if genre_query(artist_id)[1].status_code == 200]
+                print(responders_genres)
+                #responders_genres.extend(genre_query(artist_id))
+        responders_tastes[responder] = responders_genres
+
+    print(responders_tastes)
 
     #Get rid of all original music columns in the dataframe and replace with a new one, music_taste, 
 
 
     pass
 
+def get_spotify_token():
+    load_dotenv()
+
+    client_id = os.getenv("CLIENT_ID")
+    client_secret = os.getenv("CLIENT_SECRET")
+
+    auth_string = client_id + ":" + client_secret
+    auth_bytes = auth_string.encode("utf-8")
+    auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
+
+    url = "https://accounts.spotify.com/api/token"
+    spot_headers = {
+        "Authorization": "Basic " + auth_base64,
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    spot_data = {"grant_type": "client_credentials"}
+    result = post(url, headers=spot_headers, data=spot_data)
+    json_result = json.loads(result.content)
+    token = json_result["access_token"]
+
+    return token
+
+def get_auth_header(token):
+    return {"Authorization": "Bearer " + token}
+
 def genre_query(id):
     '''Query a Spotify ID and return a list of its corresponding genres'''
+    url = f"https://api.spotify.com/v1/artists/{id}"
+    token = get_spotify_token()
+    header = get_auth_header(token)
 
-    pass
+    result = get(url, headers=header)
+    json_result = json.loads(result.content)
+    print(json_result)
+    genres = json_result["genres"]
+    return genres, result
 
 def main():
     #Hobbies and weekend_activities were manually normalised using the categories outlined here: https://owaves.com/faqs/what-are-the-activity-categories/
