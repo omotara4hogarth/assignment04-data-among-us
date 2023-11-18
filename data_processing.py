@@ -17,12 +17,9 @@ def normalise_dataset(df):
     for row in clean_music_lifestyle_df.home:
         clean_music_lifestyle_df.replace(row, row.split(",")[0], inplace = True)
 
-    #Normalising postcode to the zone (drop all characters including and after the first number)
-    numbers = ["0","1","2","3","4","5","6","7","8","9"]
+    #Normalising postcode to the zone (only keep the first character)
     for row in clean_music_lifestyle_df.london_address:
-        for char in row[0:3]:
-            if char in numbers:
-                clean_music_lifestyle_df.replace(row,row.split(char)[0], inplace = True)
+        clean_music_lifestyle_df.replace(row,row[0], inplace = True)
 
     #Create a list from the social_media responses by creating a new list item at each comma
     music_columns = ["turn_up_artist","boogie_artist","sad_artist","commute_artist"]
