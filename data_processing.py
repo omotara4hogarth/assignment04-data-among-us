@@ -21,6 +21,16 @@ def normalise_dataset(df):
     for row in clean_music_lifestyle_df.london_address:
         clean_music_lifestyle_df.replace(row,row[0], inplace = True)
 
+    #Merge hobbies and weekend_activities into one column
+    clean_music_lifestyle_df['hobbies_activities'] = clean_music_lifestyle_df['hobbies']
+    i = 0
+    for item in clean_music_lifestyle_df['weekend_activities']:
+        print(item, type(item))
+        if type(item) != float:
+            clean_music_lifestyle_df.loc[i, 'hobbies_activities'] = clean_music_lifestyle_df.loc[i, 'hobbies_activities'] + ", " + item
+        i+=1
+    clean_music_lifestyle_df.drop(columns=['hobbies','weekend_activities'], inplace=True)
+
     #Create a list from the social_media responses by creating a new list item at each comma
     music_columns = ["turn_up_artist","boogie_artist","sad_artist","commute_artist"]
     responders_tastes = {}
