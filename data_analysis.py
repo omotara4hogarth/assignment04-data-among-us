@@ -7,10 +7,10 @@ from requests import post, get
 def read_dataset(path):
     '''Takes the path of a dataset csv file as input, and returns it read as a Pandas dataframe'''
     music_lifestyle_df = pd.read_csv(path)
-    #print(music_lifestyle_df)
     return(music_lifestyle_df)
 
 def normalise_dataset(df):
+    '''Normalise all unstandardised data in the dataset ('home', 'london_address', 'social_media' and all music related columns)'''
     clean_music_lifestyle_df = df
 
     #Normalising 'home' to the first string (in most cases this is a city)
@@ -38,33 +38,35 @@ def normalise_dataset(df):
             i += 1
         col_idx += 1
 
-    print(responders_tastes)
-
     for responder in responders_tastes:
         responders_tastes[responder] = responders_tastes[responder].replace(" ", "").split(",")
     
-    print(responders_tastes)
-
     #Call genre_query function on each list item in the responders_tastes dictionary, and replace the list with a new list of all genres
 
     for responder in responders_tastes:
         responders_genres = []
         for artist_id in responders_tastes[responder]:
             if artist_id != 'nan' and type(artist_id) != None:
-                #print(genre_query(artist_id)[1].status_code)
-                responders_genres = [responders_genres.append(genre) for genre in genre_query(artist_id)[0] if genre_query(artist_id)[1].status_code == 200]
-                print(responders_genres)
-                #responders_genres.extend(genre_query(artist_id))
+                try:
+                    genre_list = genre_query(artist_id)[0]
+                except:
+                    KeyError
+                for genre in genre_list:
+                    if genre not in responders_genres:
+                        responders_genres.append(genre)
         responders_tastes[responder] = responders_genres
 
-    print(responders_tastes)
-
     #Get rid of all original music columns in the dataframe and replace with a new one, music_taste, 
+    clean_music_lifestyle_df.drop(columns=music_columns, inplace=True)
+    genre_df = pd.DataFrame(index=responders_tastes, columns=['music_taste'])
+    for key in responders_tastes:
+        genre_df['music_taste'][key] = responders_tastes[key]
 
-
-    pass
+    clean_music_lifestyle_df = pd.concat([clean_music_lifestyle_df, genre_df], axis=1)
+    return clean_music_lifestyle_df
 
 def get_spotify_token():
+    '''Generate a Spotify API token'''
     load_dotenv()
 
     client_id = os.getenv("CLIENT_ID")
@@ -88,6 +90,7 @@ def get_spotify_token():
     return token
 
 def get_auth_header(token):
+    '''Given a token, construct the template header for a Spotify API request'''
     return {"Authorization": "Bearer " + token}
 
 def genre_query(id):
@@ -98,7 +101,7 @@ def genre_query(id):
 
     result = get(url, headers=header)
     json_result = json.loads(result.content)
-    print(json_result)
+
     genres = json_result["genres"]
     return genres, result
 
