@@ -1,6 +1,9 @@
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def read_dataset(path):
     '''Takes the path of a dataset csv file as input, and returns it read as a Pandas dataframe'''
@@ -22,8 +25,6 @@ def normalise_dataset(df):
             if char in numbers:
                 clean_music_lifestyle_df.replace(row,row.split(char)[0], inplace = True)
 
-    print(clean_music_lifestyle_df.london_address)
-
     #Create a list from the social_media responses by creating a new list item at each comma
     music_columns = ["turn_up_artist","boogie_artist","sad_artist","commute_artist"]
     responders_tastes = {}
@@ -32,14 +33,26 @@ def normalise_dataset(df):
         i = 0
         for row in clean_music_lifestyle_df[column]:
             if col_idx == 0:
-                responders_tastes[i] = [row]
+                responders_tastes[i] = str(row)
             else:
-                responders_tastes[i].append(row)
+                responders_tastes[i] = responders_tastes[i] + "," + str(row)
             i += 1
         col_idx += 1
-        
-    #responders_tastes = {0: [tua, ba, sa, ca], 1: [tua, ba, sa, ca]}
 
+    for responder in responders_tastes:
+        responders_tastes[responder] = responders_tastes[responder].split(",")
+    
+    print(responders_tastes)
+
+    #Call genre_query function
+
+    #Get rid of all original music columns in the dataframe and replace with a new one, music_taste, 
+
+
+    pass
+
+def genre_query(id):
+    '''Query a Spotify ID and return a list of its corresponding genres'''
 
     pass
 
