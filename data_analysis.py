@@ -4,7 +4,7 @@ import ast
 import seaborn as sns
 
 
-dataset_path = r"C:\Users\Omotara Edu\CTAClasses\Creative Code\Assignment04_DataAmongUs\data\prepared_music_lifestyle_data.csv"
+dataset_path = r"data\prepared_music_lifestyle_data.csv"
 
 music_and_lifestyle_df = pd.read_csv(dataset_path)
 
@@ -108,6 +108,7 @@ def main():
     # QUESTION
     # Which hobbies/weekend_activities have the most correlation with music taste? (Visualised using heatmap)
     genre_hobbies_df = get_dataset_x_against_y(all_our_genres, 'music_taste', all_hobbies, 'hobbies_activities')
+    print(genre_hobbies_df)
     sns.heatmap(genre_hobbies_df.drop(['music_taste'], axis=1), yticklabels=all_our_genres, cmap ='RdYlGn', linewidths = 0.30) 
     plt.show()
     # OBSERVATION
