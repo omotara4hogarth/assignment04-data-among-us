@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import ast
 import seaborn as sns
 
+
 dataset_path = r"C:\Users\Omotara Edu\CTAClasses\Creative Code\Assignment04_DataAmongUs\data\prepared_music_lifestyle_data.csv"
 
 music_and_lifestyle_df = pd.read_csv(dataset_path)
